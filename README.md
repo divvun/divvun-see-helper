@@ -126,10 +126,10 @@ Divvun-SEE-helper.app/
 
 ## Lisens
 
-Apache License 2.0 - sjå LICENSE-fila.
+MIT - sjå LICENSE-fila.
 
 ## Kontakt
 
 Divvun/Giellatekno
 - GitHub: https://github.com/divvun
-- Nettside: https://divvun.no
+- Nettside: https://giellalt.github.io
