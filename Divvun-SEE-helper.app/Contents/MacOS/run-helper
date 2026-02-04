@@ -1,0 +1,4 @@
+#!/bin/bash
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+exec "$HOME/Applications/HFST-Lookup-Helper.app/Contents/MacOS/divvun-see-helper" "$@"
