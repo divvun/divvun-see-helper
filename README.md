@@ -1,175 +1,175 @@
 # Divvun-SEE-helper
 
-Helper-app for SubEthaEdit sine Divvun-modar, designa for å omgå macOS sandbox-restriksjonar.
+Helper app for SubEthaEdit's Divvun modes, designed to circumvent macOS sandbox restrictions.
 
-## Om
+## About
 
-SubEthaEdit er ein sandboxa macOS-applikasjon som ikkje kan køyre eksterne binærar direkte. Divvun-SEE-helper.app er ein unsandboxa helper-app som køyrer utanfor sandboxen og gir tilgang til verktøy som `hfst-lookup`, `missing.py` og andre HFST/Giella-verktøy.
+SubEthaEdit is a sandboxed macOS application that cannot execute external binaries directly. Divvun-SEE-helper.app is an unsandboxed helper app that runs outside the sandbox and provides access to tools like `hfst-lookup`, `missing.py`, and other HFST/Giella tools.
 
-## Funksjonalitet
+## Features
 
-- **Lexc-lexicalise-missing**: Analyserer ord i LexC-filer og gir forslag til manglande lexikon-oppføringar ved å køyre `missing.py` frå giella-core
-- **Clipboard-basert kommunikasjon**: Brukar clipboard med base64-koda JSON for sikker dataoverføring mellom sandbox og helper
-- **UTF-8-støtte**: Handterer sørsamiske og andre samiske språk med spesialteikn korrekt
+- **Lexc-lexicalise-missing**: Analyzes words in LexC files and suggests missing lexicon entries by running `missing.py` from giella-core
+- **Clipboard-based communication**: Uses clipboard with base64-encoded JSON for secure data transfer between sandbox and helper
+- **UTF-8 support**: Correctly handles South Sámi and other Sámi languages with special characters
 
-## Installasjon
+## Installation
 
-### Enkel installasjon (med Makefile)
+### Simple installation (with Makefile)
 
 ```bash
 make install
 ```
 
-Dette kopierer `Divvun-SEE-helper.app` til `~/Applications/`.
+This copies `Divvun-SEE-helper.app` to `~/Applications/`.
 
-### Manuell installasjon
+### Manual installation
 
-1. Kopier `Divvun-SEE-helper.app` til `~/Applications/`
-2. Første gong du køyrer appen må du høgreklikke og velje "Opne" for å godkjenne appen (macOS sikkerheit)
+1. Copy `Divvun-SEE-helper.app` to `~/Applications/`
+2. The first time you run the app, you must right-click and choose "Open" to approve the app (macOS security)
 
 ```bash
 cp -R Divvun-SEE-helper.app ~/Applications/
 ```
 
-### For utviklarar: Signering og notarisering
+### For developers: Code signing and notarization
 
-For å distribuere appen utan sikkerheitssperrer frå macOS treng du ein Apple Developer konto.
+To distribute the app without macOS security warnings, you need an Apple Developer account.
 
-**1. Konfigurer miljøvariablar:**
+**1. Configure environment variables:**
 
-Kopier `.env.example` til `.env` og fyll inn verdiane:
+Copy `.env.example` to `.env` and fill in the values:
 
 ```bash
 cp .env.example .env
-# Rediger .env med dine Apple Developer-detaljar
+# Edit .env with your Apple Developer details
 source .env
 ```
 
-**2. Signer appen:**
+**2. Sign the app:**
 
 ```bash
 make sign
-# eller direkte: ./sign.sh
+# or directly: ./sign.sh
 ```
 
-**3. Notarisér appen:**
+**3. Notarize the app:**
 
 ```bash
 make notarize
-# eller direkte: ./notarize.sh
+# or directly: ./notarize.sh
 ```
 
-Når notariseringa er fullført, kan appen installerast utan sikkerheitssperrer.
+Once notarization is complete, the app can be installed without security warnings.
 
-## Konfigurasjon
+## Configuration
 
-Helper-appen finn automatisk `missing.py` ved å sjekke desse stadene i rekkefølgje:
+The helper app automatically finds `missing.py` by checking these locations in order:
 
-1. `$GTLANGS/giella-core/scripts/missing.py` (frå JSON-input)
-2. `~/.divvun-see-helper-config` (valfri config-fil)
+1. `$GTLANGS/giella-core/scripts/missing.py` (from JSON input)
+2. `~/.divvun-see-helper-config` (optional config file)
 3. `~/langtech/gut/giellalt/giella-core/scripts/missing.py`
 4. `~/langtech/giellalt/giella-core/scripts/missing.py`
 
-### Valfri konfigurasjon
+### Optional configuration
 
-Opprett `~/.divvun-see-helper-config` for å spesifisere eigendefinert sti til giella-core og for å slå på logging:
+Create `~/.divvun-see-helper-config` to specify a custom path to giella-core and to enable logging:
 
 ```bash
-# Eigendefinert sti til giella-core (valfritt)
+# Custom path to giella-core (optional)
 export GTCORE=/path/to/giella-core
 
-# Slå på debug-logging (standard er false)
+# Enable debug logging (default is false)
 export ENABLE_LOGGING=true
 ```
 
-## Bruk
+## Usage
 
-Helper-appen blir automatisk starta av SubEthaEdit-modane når du brukar funksjonar som treng eksterne verktøy:
+The helper app is automatically launched by SubEthaEdit modes when you use features that require external tools:
 
-- **LexC-modus**: `⌃⌥⌘M` (Ctrl+Option+Cmd+M) for "Lexicalise missing"
+- **LexC mode**: `⌃⌥⌘M` (Ctrl+Option+Cmd+M) for "Lexicalise missing"
 
 ## Debugging
 
-Debug-logging er som standard **avslått** for å unngå unødvendig loggskriving. For å slå på logging, legg til følgjande i `~/.divvun-see-helper-config`:
+Debug logging is **disabled** by default to avoid unnecessary log files. To enable logging, add the following to `~/.divvun-see-helper-config`:
 
 ```bash
 export ENABLE_LOGGING=true
 ```
 
-Når logging er aktivert, vil helper-appen logge all aktivitet til:
+When logging is enabled, the helper app will log all activity to:
 
 ```
 ~/divvun-see-helper-debug.log
 ```
 
-Sjekk denne fila ved feilsøking.
+Check this file when troubleshooting.
 
-## Kommunikasjonsprotokoll
+## Communication Protocol
 
-Helper-appen kommuniserer via clipboard med JSON-format:
+The helper app communicates via clipboard using JSON format:
 
-### Input (frå SubEthaEdit):
+### Input (from SubEthaEdit):
 ```json
 {
   "operation": "analyze_missing",
   "lang": "sma",
   "gtlangs": "/path/to/lang-sma/..",
   "docname": "filename.lexc",
-  "input_words_b64": "<base64-koda ord>"
+  "input_words_b64": "<base64-encoded words>"
 }
 ```
 
-### Output (frå helper):
+### Output (from helper):
 ```json
 {
   "status": "success",
-  "output": "<resultatet frå missing.py>"
+  "output": "<result from missing.py>"
 }
 ```
 
-Ved feil:
+On error:
 ```json
 {
   "status": "error",
-  "message": "Feilmelding",
-  "details": "Detaljert feilinfo"
+  "message": "Error message",
+  "details": "Detailed error information"
 }
 ```
 
-## Systemkrav
+## System Requirements
 
-- macOS 10.15 eller nyare
-- Python 3.9+ (inkludert i Xcode Command Line Tools)
-- HFST-verktøy installert (via Homebrew eller manuelt)
+- macOS 10.15 or newer
+- Python 3.9+ (included in Xcode Command Line Tools)
+- HFST tools installed (via Homebrew or manually)
 - giella-core (for missing.py)
 
-## Arkitektur
+## Architecture
 
 ```
 Divvun-SEE-helper.app/
 ├── Contents/
 │   ├── Info.plist          # App metadata
 │   └── MacOS/
-│       ├── run-helper      # Wrapper som set UTF-8 locale
-│       └── divvun-see-helper  # Hovudskript
+│       ├── run-helper      # Wrapper that sets UTF-8 locale
+│       └── divvun-see-helper  # Main script
 ```
 
-### Komponenter:
+### Components:
 
-1. **run-helper**: Wrapper-skript som set `LANG=en_US.UTF-8` og `LC_ALL=en_US.UTF-8` før det køyrer hovudskriptet
-2. **divvun-see-helper**: Bash-skript som:
-   - Les JSON frå clipboard
-   - Base64-dekodar input
-   - Finn og køyrer missing.py
-   - Konstruerer JSON-respons med escaped newlines
-   - Skriv resultat tilbake til clipboard
+1. **run-helper**: Wrapper script that sets `LANG=en_US.UTF-8` and `LC_ALL=en_US.UTF-8` before running the main script
+2. **divvun-see-helper**: Bash script that:
+   - Reads JSON from clipboard
+   - Base64-decodes input
+   - Finds and runs missing.py
+   - Constructs JSON response with escaped newlines
+   - Writes result back to clipboard
 
-## Lisens
+## License
 
-MIT - sjå LICENSE-fila.
+MIT - see LICENSE file.
 
-## Kontakt
+## Contact
 
 Divvun/Giellatekno
 - GitHub: https://github.com/divvun
-- Nettside: https://giellalt.github.io
+- Website: https://giellalt.github.io
