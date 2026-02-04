@@ -4,11 +4,23 @@
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# Debug logging
-LOG_FILE="$HOME/divvun-see-helper-debug.log"
-echo "=== Divvun SEE Helper Started at $(date) ===" >> "$LOG_FILE"
-echo "Args: $@" >> "$LOG_FILE"
-echo "LANG: $LANG" >> "$LOG_FILE"
+# Check if logging is enabled via config file
+ENABLE_LOGGING=false
+if [ -f "$HOME/.divvun-see-helper-config" ]; then
+    source "$HOME/.divvun-see-helper-config"
+fi
+
+# Helper function for logging
+log() {
+    if [ "$ENABLE_LOGGING" = "true" ]; then
+        LOG_FILE="$HOME/divvun-see-helper-debug.log"
+        echo "$@" >> "$LOG_FILE"
+    fi
+}
+
+log "=== Divvun SEE Helper Started at $(date) ==="
+log "Args: $@"
+log "LANG: $LANG"
 
 # Check if we got command line arguments (for direct invocation)
 if [ $# -gt 0 ]; then
@@ -17,61 +29,72 @@ if [ $# -gt 0 ]; then
     GTLANGS="$3"
     DOCNAME="$4"
     
-    echo "Operation from args: $OPERATION" >> "$LOG_FILE"
-    echo "LANG: $LANGCODE" >> "$LOG_FILE"
-    echo "GTLANGS: $GTLANGS" >> "$LOG_FILE"
-    echo "DOCNAME: $DOCNAME" >> "$LOG_FILE"
+    log "Operation from args: $OPERATION"
+    log "LANG: $LANGCODE"
+    log "GTLANGS: $GTLANGS"
+    log "DOCNAME: $DOCNAME"
     
     # Read input words from clipboard
     INPUT_WORDS=$(pbpaste)
-    echo "INPUT_WORDS from clipboard: ${INPUT_WORDS:0:100}..." >> "$LOG_FILE"
+    log "INPUT_WORDS from clipboard: ${INPUT_WORDS:0:100}..."
 else
     # Read JSON from clipboard
     INPUT_JSON=$(pbpaste)
-    echo "Clipboard content (first 200 chars): ${INPUT_JSON:0:200}" >> "$LOG_FILE"
+    log "Clipboard content (first 200 chars): ${INPUT_JSON:0:200}"
     
     # Parse JSON using python - check for base64-encoded input first
-    OPERATION=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('operation', ''))" 2>> "$LOG_FILE")
-    LANGCODE=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('lang', ''))" 2>> "$LOG_FILE")
-    GTLANGS=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('gtlangs', ''))" 2>> "$LOG_FILE")
-    DOCNAME=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('docname', ''))" 2>> "$LOG_FILE")
+    ERR_LOG=$(mktemp)
+    OPERATION=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('operation', ''))" 2>"$ERR_LOG")
+    [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
+    
+    LANGCODE=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('lang', ''))" 2>"$ERR_LOG")
+    [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
+    
+    GTLANGS=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('gtlangs', ''))" 2>"$ERR_LOG")
+    [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
+    
+    DOCNAME=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('docname', ''))" 2>"$ERR_LOG")
+    [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
     
     # Check if input is base64-encoded
-    if echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); sys.exit(0 if 'input_words_b64' in data else 1)" 2>> "$LOG_FILE"; then
-        echo "Input is base64-encoded" >> "$LOG_FILE"
-        INPUT_WORDS=$(LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 echo "$INPUT_JSON" | python3 -c "import sys, json, base64; data=json.load(sys.stdin); print(base64.b64decode(data['input_words_b64']).decode('utf-8'))" 2>> "$LOG_FILE")
+    if echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); sys.exit(0 if 'input_words_b64' in data else 1)" 2>"$ERR_LOG"; then
+        log "Input is base64-encoded"
+        INPUT_WORDS=$(LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 echo "$INPUT_JSON" | python3 -c "import sys, json, base64; data=json.load(sys.stdin); print(base64.b64decode(data['input_words_b64']).decode('utf-8'))" 2>"$ERR_LOG")
+        [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
     else
-        INPUT_WORDS=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('input_words', ''))" 2>> "$LOG_FILE")
+        INPUT_WORDS=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('input_words', ''))" 2>"$ERR_LOG")
+        [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
     fi
+    rm -f "$ERR_LOG"
     
-    echo "Operation: $OPERATION" >> "$LOG_FILE"
-    echo "LANG: $LANGCODE" >> "$LOG_FILE"
-    echo "GTLANGS: $GTLANGS" >> "$LOG_FILE"
-    echo "DOCNAME: $DOCNAME" >> "$LOG_FILE"
-    echo "INPUT_WORDS (first 100 chars): ${INPUT_WORDS:0:100}..." >> "$LOG_FILE"
-fi
-
-if [ "$OPERATION" = "analyze_missing" ]; then
-    # New operation: run missing.py from giella-core
-    
-    # Find missing.py - try multiple locations
-    MISSING_PY=""
-    
-    # Try GTLANGS/giella-core first
-    if [ -f "$GTLANGS/giella-core/scripts/missing.py" ]; then
-        MISSING_PY="$GTLANGS/giella-core/scripts/missing.py"
-        echo "Found missing.py at: $MISSING_PY" >> "$LOG_FILE"
+    log "Operation: $OPERATION"
+    log "LANG: $LANGCODE"
+    log "GTLANGS: $GTLANGS"
+    log "DOCNAME: $DOCNAME"
+    log "INPUT_WORDS (first 100 chars): ${INPUT_WORDS:0:100}..."
+filog "Found missing.py at: $MISSING_PY"
     # Try config file
     elif [ -f "$HOME/.divvun-see-helper-config" ]; then
         source "$HOME/.divvun-see-helper-config"
         if [ -n "$GTCORE" ] && [ -f "$GTCORE/scripts/missing.py" ]; then
             MISSING_PY="$GTCORE/scripts/missing.py"
-            echo "Found missing.py via config at: $MISSING_PY" >> "$LOG_FILE"
+            log "Found missing.py via config at: $MISSING_PY"
         fi
     fi
     
     # Try standard locations
     if [ -z "$MISSING_PY" ]; then
+        for TRYPATH in "$HOME/langtech/gut/giellalt/giella-core" "$HOME/langtech/giellalt/giella-core"; do
+            if [ -f "$TRYPATH/scripts/missing.py" ]; then
+                MISSING_PY="$TRYPATH/scripts/missing.py"
+                log "Found missing.py at standard location: $MISSING_PY"
+                break
+            fi
+        done
+    fi
+    
+    if [ -z "$MISSING_PY" ]; then
+        log "ERROR: Could not find missing.py
         for TRYPATH in "$HOME/langtech/gut/giellalt/giella-core" "$HOME/langtech/giellalt/giella-core"; do
             if [ -f "$TRYPATH/scripts/missing.py" ]; then
                 MISSING_PY="$TRYPATH/scripts/missing.py"
@@ -81,56 +104,64 @@ if [ "$OPERATION" = "analyze_missing" ]; then
         done
     fi
     
-    if [ -z "$MISSING_PY" ]; then
-        echo "ERROR: Could not find missing.py" >> "$LOG_FILE"
-        echo '{"status": "error", "message": "Could not find missing.py. Try creating ~/.divvun-see-helper-config with GTCORE=/path/to/giella-core"}' | pbcopy
-        exit 1
-    fi
+    log "Running: echo \$INPUT_WORDS | python3 $MISSING_PY -l $LANGCODE -c $DOCNAME"
+    OUTPUT=$(printf "%s" "$INPUT_WORDS" | python3 "$MISSING_PY" -l "$LANGCODE" -c "$DOCNAME" 2>&1)
+    EXIT_CODE=$?
+    log "missing.py exit code: $EXIT_CODE"
+    log "Output length: ${#OUTPUT}
     
     # Set up environment and run missing.py
     export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
     export GTLANGS="$GTLANGS"
-    export LC_ALL=en_US.UTF-8
-    
-    echo "Running: echo \$INPUT_WORDS | python3 $MISSING_PY -l $LANGCODE -c $DOCNAME" >> "$LOG_FILE"
-    OUTPUT=$(printf "%s" "$INPUT_WORDS" | python3 "$MISSING_PY" -l "$LANGCODE" -c "$DOCNAME" 2>&1)
+    expolog "Success! Result written to clipboard"
+    else
+        log "ERROR: missing.py failed"
+        log "Error output: $OUTPUT"$MISSING_PY" -l "$LANGCODE" -c "$DOCNAME" 2>&1)
     EXIT_CODE=$?
     echo "missing.py exit code: $EXIT_CODE" >> "$LOG_FILE"
     echo "Output length: ${#OUTPUT}" >> "$LOG_FILE"
     
     if [ $EXIT_CODE -eq 0 ]; then
-        # Success - return output directly
-        printf "%s" "$OUTPUT" | python3 -c "import json, sys; print(json.dumps({'status': 'success', 'output': sys.stdin.read()}))"  | pbcopy
-        echo "Success! Result written to clipboard" >> "$LOG_FILE"
-    else
-        echo "ERROR: missing.py failed" >> "$LOG_FILE"
-        echo "Error output: $OUTPUT" >> "$LOG_FILE"
-        python3 -c "import json; print(json.dumps({'status': 'error', 'message': 'missing.py failed', 'details': '''$OUTPUT'''}))" | pbcopy
-    fi
+    ERR_LOG=$(mktemp)
+    FST_FILE=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('fst_file', ''))" 2>"$ERR_LOG")
+    [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
     
-elif [ "$OPERATION" = "hfst_lookup" ]; then
-    # Legacy operation: direct hfst-lookup (keep for compatibility)
-    FST_FILE=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('fst_file', ''))" 2>> "$LOG_FILE")
-    INPUT_WORDS=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('input_words', ''))" 2>> "$LOG_FILE")
+    INPUT_WORDS=$(echo "$INPUT_JSON" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('input_words', ''))" 2>"$ERR_LOG")
+    [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
+    rm -f "$ERR_LOG"
     
-    echo "FST_FILE: $FST_FILE" >> "$LOG_FILE"
-    echo "INPUT_WORDS: $INPUT_WORDS" >> "$LOG_FILE"
+    log "FST_FILE: $FST_FILE"
+    log "INPUT_WORDS: $INPUT_WORDS"
     
     if [ -z "$FST_FILE" ] || [ -z "$INPUT_WORDS" ]; then
-        echo "ERROR: Missing FST file or input words" >> "$LOG_FILE"
+        log "ERROR: Missing FST file or input words"
         echo '{"status": "error", "message": "Invalid input"}' | pbcopy
         exit 1
     fi
     
     if [ ! -f "$FST_FILE" ]; then
-        echo "ERROR: FST file not found: $FST_FILE" >> "$LOG_FILE"
+        log "ERROR: FST file not found: $FST_FILE"
         echo '{"status": "error", "message": "FST file not found"}' | pbcopy
         exit 1
     fi
     
     # Run hfst-lookup
     export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
-    echo "Running hfst-lookup..." >> "$LOG_FILE"
+    log "Running hfst-lookup..."
+    ERR_LOG=$(mktemp)
+    OUTPUT=$(printf "%s" "$INPUT_WORDS" | hfst-lookup "$FST_FILE" 2>"$ERR_LOG")
+    [ "$ENABLE_LOGGING" = "true" ] && cat "$ERR_LOG" >> "$LOG_FILE"
+    rm -f "$ERR_LOG"
+    EXIT_CODE=$?
+    log "hfst-lookup exit code: $EXIT_CODE"
+    
+    log "ERROR: Unknown operation: $OPERATION"
+    echo '{"status": "error", "message": "Unknown operation"}' | pbcopy
+    exit 1
+fi
+
+log "=== Helper Finished ==="
+log "t-lookup..." >> "$LOG_FILE"
     OUTPUT=$(printf "%s" "$INPUT_WORDS" | hfst-lookup "$FST_FILE" 2>> "$LOG_FILE")
     EXIT_CODE=$?
     echo "hfst-lookup exit code: $EXIT_CODE" >> "$LOG_FILE"

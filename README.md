@@ -32,10 +32,14 @@ Helper-appen finn automatisk `missing.py` ved å sjekke desse stadene i rekkefø
 
 ### Valfri konfigurasjon
 
-Opprett `~/.divvun-see-helper-config` for å spesifisere eigendefinert sti til giella-core:
+Opprett `~/.divvun-see-helper-config` for å spesifisere eigendefinert sti til giella-core og for å slå på logging:
 
 ```bash
+# Eigendefinert sti til giella-core (valfritt)
 export GTCORE=/path/to/giella-core
+
+# Slå på debug-logging (standard er false)
+export ENABLE_LOGGING=true
 ```
 
 ## Bruk
@@ -46,7 +50,13 @@ Helper-appen blir automatisk starta av SubEthaEdit-modane når du brukar funksjo
 
 ## Debugging
 
-Helper-appen loggar all aktivitet til:
+Debug-logging er som standard **avslått** for å unngå unødvendig loggskriving. For å slå på logging, legg til følgjande i `~/.divvun-see-helper-config`:
+
+```bash
+export ENABLE_LOGGING=true
+```
+
+Når logging er aktivert, vil helper-appen logge all aktivitet til:
 
 ```
 ~/divvun-see-helper-debug.log
