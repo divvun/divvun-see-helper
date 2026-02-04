@@ -14,12 +14,52 @@ SubEthaEdit er ein sandboxa macOS-applikasjon som ikkje kan køyre eksterne bin�
 
 ## Installasjon
 
+### Enkel installasjon (med Makefile)
+
+```bash
+make install
+```
+
+Dette kopierer `Divvun-SEE-helper.app` til `~/Applications/`.
+
+### Manuell installasjon
+
 1. Kopier `Divvun-SEE-helper.app` til `~/Applications/`
 2. Første gong du køyrer appen må du høgreklikke og velje "Opne" for å godkjenne appen (macOS sikkerheit)
 
 ```bash
 cp -R Divvun-SEE-helper.app ~/Applications/
 ```
+
+### For utviklarar: Signering og notarisering
+
+For å distribuere appen utan sikkerheitssperrer frå macOS treng du ein Apple Developer konto.
+
+**1. Konfigurer miljøvariablar:**
+
+Kopier `.env.example` til `.env` og fyll inn verdiane:
+
+```bash
+cp .env.example .env
+# Rediger .env med dine Apple Developer-detaljar
+source .env
+```
+
+**2. Signer appen:**
+
+```bash
+make sign
+# eller direkte: ./sign.sh
+```
+
+**3. Notarisér appen:**
+
+```bash
+make notarize
+# eller direkte: ./notarize.sh
+```
+
+Når notariseringa er fullført, kan appen installerast utan sikkerheitssperrer.
 
 ## Konfigurasjon
 
