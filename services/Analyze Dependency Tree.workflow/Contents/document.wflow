@@ -59,7 +59,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>"$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-text-service.sh"</string>
+					<string>"$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-dependency-tree-service.sh"</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -84,7 +84,7 @@
 				<key>Class Name</key>
 				<string>RunShellScriptAction</string>
 				<key>InputUUID</key>
-				<string>C6D7E8F9-0A1B-2C3D-4E5F-6A7B8C9D0E1F</string>
+				<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
@@ -94,9 +94,7 @@
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
-				<string>D7E8F9A0-1B2C-3D4E-5F6A-7B8C9D0E1F2A</string>
-				<key>UUID</key>
-				<string>E8F9A0B1-2C3D-4E5F-6A7B-8C9D0E1F2A3B</string>
+				<string>B2C3D4E5-F6A7-8901-BCDE-F12345678901</string>
 				<key>UnlocalizedApplications</key>
 				<array>
 					<string>Automator</string>
@@ -171,29 +169,21 @@
 				</dict>
 				<key>isViewVisible</key>
 				<integer>1</integer>
+				<key>location</key>
+				<string>309.000000:316.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
+			<key>isViewVisible</key>
+			<integer>1</integer>
 		</dict>
 	</array>
 	<key>connectors</key>
 	<dict/>
 	<key>workflowMetaData</key>
 	<dict>
-		<key>applicationBundleID</key>
-		<string>com.apple.Automator</string>
-		<key>applicationBundleIDsByPath</key>
-		<dict/>
-		<key>applicationPath</key>
-		<string>/System/Library/CoreServices/Automator.app</string>
-		<key>applicationPaths</key>
-		<array/>
-		<key>inputTypeIdentifier</key>
-		<string>com.apple.Automator.text</string>
-		<key>outputTypeIdentifier</key>
-		<string>com.apple.Automator.nothing</string>
-		<key>presentationMode</key>
-		<integer>15</integer>
-		<key>processesInput</key>
-		<integer>0</integer>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.servicesMenu</string>
 		<key>serviceApplicationBundleID</key>
 		<string></string>
 		<key>serviceApplicationPath</key>
@@ -203,13 +193,21 @@
 		<key>serviceOutputTypeIdentifier</key>
 		<string>com.apple.Automator.nothing</string>
 		<key>serviceProcessesInput</key>
-	<integer>1</integer>
+		<integer>1</integer>
 		<key>systemImageName</key>
 		<string>NSActionTemplate</string>
 		<key>useAutomaticInputType</key>
 		<integer>0</integer>
 		<key>workflowTypeIdentifier</key>
 		<string>com.apple.Automator.servicesMenu</string>
+		<key>inputTypeIdentifier</key>
+		<string>com.apple.Automator.text</string>
+		<key>outputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>presentationMode</key>
+		<integer>15</integer>
+		<key>processesInput</key>
+		<integer>0</integer>
 	</dict>
 </dict>
 </plist>

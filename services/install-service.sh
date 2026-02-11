@@ -24,17 +24,27 @@ SERVICE_DEST="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/$SERVICE_S
 WORKFLOW_DIR="$HOME/Library/Services"
 CONFIG_FILE="$HOME/.divvun-see-helper-config"
 
-# Step 1: Copy the service script
-echo -e "${YELLOW}Step 1: Installing service script...${NC}"
+# Step 1: Installing service scripts...
+echo -e "${YELLOW}Step 1: Installing service scripts...${NC}"
 if [ ! -d "$HOME/Applications/Divvun-SEE-helper.app" ]; then
     echo -e "${RED}Error: Divvun-SEE-helper.app not found in ~/Applications/${NC}"
     echo "Please run 'make install' first to install the main app."
     exit 1
 fi
 
+# Install text analysis service
+SERVICE_SCRIPT="analyze-text-service.sh"
+SERVICE_DEST="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/$SERVICE_SCRIPT"
 cp "$SCRIPT_DIR/$SERVICE_SCRIPT" "$SERVICE_DEST"
 chmod +x "$SERVICE_DEST"
-echo -e "${GREEN}✓ Service script installed to $SERVICE_DEST${NC}"
+echo -e "${GREEN}✓ Text analysis service installed${NC}"
+
+# Install dependency tree service
+DEP_SCRIPT="analyze-dependency-tree-service.sh"
+DEP_DEST="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/$DEP_SCRIPT"
+cp "$SCRIPT_DIR/$DEP_SCRIPT" "$DEP_DEST"
+chmod +x "$DEP_DEST"
+echo -e "${GREEN}✓ Dependency tree service installed${NC}"
 echo
 
 # Step 2: Install Automator workflows
@@ -44,15 +54,15 @@ mkdir -p "$WORKFLOW_DIR"
 # Check which workflows exist
 INSTALLED_COUNT=0
 
-if [ -d "$SCRIPT_DIR/Analyser tekst.workflow" ]; then
-    cp -R "$SCRIPT_DIR/Analyser tekst.workflow" "$WORKFLOW_DIR/"
-    echo -e "${GREEN}✓ Installed: Analyser tekst (Norwegian)${NC}"
+if [ -d "$SCRIPT_DIR/Analyze Text.workflow" ]; then
+    cp -R "$SCRIPT_DIR/Analyze Text.workflow" "$WORKFLOW_DIR/"
+    echo -e "${GREEN}✓ Installed: Analyze Text${NC}"
     INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
 fi
 
-if [ -d "$SCRIPT_DIR/Analyze Text.workflow" ]; then
-    cp -R "$SCRIPT_DIR/Analyze Text.workflow" "$WORKFLOW_DIR/"
-    echo -e "${GREEN}✓ Installed: Analyze Text (English)${NC}"
+if [ -d "$SCRIPT_DIR/Analyze Dependency Tree.workflow" ]; then
+    cp -R "$SCRIPT_DIR/Analyze Dependency Tree.workflow" "$WORKFLOW_DIR/"
+    echo -e "${GREEN}✓ Installed: Analyze Dependency Tree${NC}"
     INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
 fi
 

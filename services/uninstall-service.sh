@@ -15,29 +15,40 @@ echo -e "${GREEN}=== Uninstalling Divvun Text Analysis Service ===${NC}"
 echo
 
 # Paths
-SERVICE_SCRIPT="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-text-service.sh"
+TEXT_SERVICE="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-text-service.sh"
+DEP_SERVICE="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-dependency-tree-service.sh"
 WORKFLOW_DIR="$HOME/Library/Services"
 
-# Remove service script
-if [ -f "$SERVICE_SCRIPT" ]; then
-    rm "$SERVICE_SCRIPT"
-    echo -e "${GREEN}✓ Removed service script${NC}"
-else
-    echo -e "${YELLOW}Service script not found (already removed?)${NC}"
+# Remove service scripts
+REMOVED_SCRIPTS=0
+if [ -f "$TEXT_SERVICE" ]; then
+    rm "$TEXT_SERVICE"
+    echo -e "${GREEN}✓ Removed text analysis service${NC}"
+    REMOVED_SCRIPTS=$((REMOVED_SCRIPTS + 1))
+fi
+
+if [ -f "$DEP_SERVICE" ]; then
+    rm "$DEP_SERVICE"
+    echo -e "${GREEN}✓ Removed dependency tree service${NC}"
+    REMOVED_SCRIPTS=$((REMOVED_SCRIPTS + 1))
+fi
+
+if [ $REMOVED_SCRIPTS -eq 0 ]; then
+    echo -e "${YELLOW}Service scripts not found (already removed?)${NC}"
 fi
 
 # Remove workflows
 REMOVED_COUNT=0
 
-if [ -d "$WORKFLOW_DIR/Analyser tekst.workflow" ]; then
-    rm -rf "$WORKFLOW_DIR/Analyser tekst.workflow"
-    echo -e "${GREEN}✓ Removed: Analyser tekst${NC}"
-    REMOVED_COUNT=$((REMOVED_COUNT + 1))
-fi
-
 if [ -d "$WORKFLOW_DIR/Analyze Text.workflow" ]; then
     rm -rf "$WORKFLOW_DIR/Analyze Text.workflow"
     echo -e "${GREEN}✓ Removed: Analyze Text${NC}"
+    REMOVED_COUNT=$((REMOVED_COUNT + 1))
+fi
+
+if [ -d "$WORKFLOW_DIR/Analyze Dependency Tree.workflow" ]; then
+    rm -rf "$WORKFLOW_DIR/Analyze Dependency Tree.workflow"
+    echo -e "${GREEN}✓ Removed: Analyze Dependency Tree${NC}"
     REMOVED_COUNT=$((REMOVED_COUNT + 1))
 fi
 
