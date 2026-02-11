@@ -178,6 +178,77 @@ elif [ "$OPERATION" = "hfst_lookup" ]; then
         log "ERROR: hfst-lookup failed"
         echo '{"status": "error", "message": "hfst-lookup failed"}' | pbcopy
     fi
+
+elif [ "$OPERATION" = "divvun_analyze" ]; then
+    # New operation: analyze text with divvun-runtime and .drb file
+    
+    log "Operation: divvun_analyze"
+    log "Language: $LANGCODE"
+    log "GTLANGS: $GTLANGS"
+    
+    # Check if divvun-runtime is available
+    if ! command -v divvun-runtime &> /dev/null; then
+        log "ERROR: divvun-runtime not found in PATH"
+        echo '{"status": "error", "message": "divvun-runtime not found. Install it with: brew install divvun/divvun/divvun-runtime"}' | pbcopy
+        exit 1
+    fi
+    
+    # Find the newest .drb file for the language
+    # The file is always named ${LANGCODE}.drb and located in tools/analysers/
+    # Build directories can have various names and are located 1-2 levels down
+    DRB_FILE=""
+    
+    log "Searching for ${LANGCODE}.drb in tools/analysers/ directories..."
+    
+    # Search for ${LANGCODE}.drb in all tools/analysers/ subdirectories
+    # Supports build dirs at both 1 level ($GTLANGS/build/tools/analysers/) 
+    # and 2 levels down ($GTLANGS/some/build/tools/analysers/)
+    if [ -d "$GTLANGS" ]; then
+        # Find all matching .drb files, searching up to 3 levels deep
+        FOUND_FILES=$(find "$GTLANGS" -maxdepth 3 -type f -path "*/tools/analysers/${LANGCODE}.drb" 2>/dev/null)
+        
+        if [ -n "$FOUND_FILES" ]; then
+            # Get the newest file by modification time
+            while IFS= read -r file; do
+                if [ -z "$DRB_FILE" ] || [ "$file" -nt "$DRB_FILE" ]; then
+                    DRB_FILE="$file"
+                fi
+            done <<< "$FOUND_FILES"
+        fi
+    fi
+    
+    if [ -z "$DRB_FILE" ]; then
+        log "ERROR: Could not find ${LANGCODE}.drb file"
+        echo '{"status": "error", "message": "Could not find .drb file for language '"$LANGCODE"'. Build the analyser first."}' | pbcopy
+        exit 1
+    fi
+    
+    log "Found .drb file: $DRB_FILE"
+    
+    # Run divvun-runtime with the .drb file
+    export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
+    log "Running: divvun-runtime run -p $DRB_FILE"
+    
+    if [ "$ENABLE_LOGGING" = "true" ]; then
+        OUTPUT=$(printf "%s" "$INPUT_WORDS" | divvun-runtime run -p "$DRB_FILE" 2>> "$LOG_FILE")
+    else
+        OUTPUT=$(printf "%s" "$INPUT_WORDS" | divvun-runtime run -p "$DRB_FILE" 2>/dev/null)
+    fi
+    EXIT_CODE=$?
+    
+    log "divvun-runtime exit code: $EXIT_CODE"
+    log "Output length: ${#OUTPUT}"
+    
+    if [ $EXIT_CODE -eq 0 ]; then
+        # Success - return output
+        printf "%s" "$OUTPUT" | python3 -c "import json, sys; print(json.dumps({'status': 'success', 'output': sys.stdin.read()}))" | pbcopy
+        log "Success! Result written to clipboard"
+    else
+        log "ERROR: divvun-runtime failed"
+        log "Error output: $OUTPUT"
+        python3 -c "import json; print(json.dumps({'status': 'error', 'message': 'divvun-runtime failed', 'details': '''$OUTPUT'''}))" | pbcopy
+    fi
+
 else
     log "ERROR: Unknown operation: $OPERATION"
     echo '{"status": "error", "message": "Unknown operation"}' | pbcopy

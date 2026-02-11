@@ -9,6 +9,7 @@ SubEthaEdit is a sandboxed macOS application that cannot execute external binari
 ## Features
 
 - **Lexc-lexicalise-missing**: Analyzes words in LexC files and suggests missing lexicon entries by running `missing.py` from giella-core
+- **Divvun-runtime analysis**: Analyzes text using `divvun-runtime` with prebuilt `.drb` analyser files from the project build tree
 - **Clipboard-based communication**: Uses clipboard with base64-encoded JSON for secure data transfer between sandbox and helper
 - **UTF-8 support**: Correctly handles South Sámi and other Sámi languages with special characters
 
@@ -88,6 +89,22 @@ The helper app is automatically launched by SubEthaEdit modes when you use featu
 
 - **LexC mode**: `⌃⌥⌘M` (Ctrl+Option+Cmd+M) for "Lexicalise missing"
 
+### Divvun-runtime analysis
+
+For the `divvun_analyze` operation to work, you need:
+
+1. **divvun-runtime** installed (see System Requirements)
+2. A **built analyser** (`.drb` file) in your language project
+
+To build the analyser:
+```bash
+cd /path/to/lang-xxx
+./configure --enable-analyser-tool --enable-tokenisers
+make
+```
+
+The helper automatically searches for the newest `${LANGCODE}.drb` file in any `tools/analysers/` directory within your project, regardless of build directory names (searches up to 2 levels deep).
+
 ## Debugging
 
 Debug logging is **disabled** by default to avoid unnecessary log files. To enable logging, add the following to `~/.divvun-see-helper-config`:
@@ -108,7 +125,11 @@ Check this file when troubleshooting.
 
 The helper app communicates via clipboard using JSON format:
 
-### Input (from SubEthaEdit):
+### Operation: analyze_missing
+
+Analyzes words using `missing.py` from giella-core.
+
+**Input (from SubEthaEdit):**
 ```json
 {
   "operation": "analyze_missing",
@@ -119,13 +140,37 @@ The helper app communicates via clipboard using JSON format:
 }
 ```
 
-### Output (from helper):
+**Output (from helper):**
 ```json
 {
   "status": "success",
   "output": "<result from missing.py>"
 }
 ```
+
+### Operation: divvun_analyze
+
+Analyzes text using `divvun-runtime` with prebuilt `.drb` analyser files.
+
+**Input (from SubEthaEdit):**
+```json
+{
+  "operation": "divvun_analyze",
+  "lang": "sma",
+  "gtlangs": "/path/to/lang-sma",
+  "input_words_b64": "<base64-encoded words>"
+}
+```
+
+**Output (from helper):**
+```json
+{
+  "status": "success",
+  "output": "<analysis result from divvun-runtime>"
+}
+```
+
+### Error responses
 
 On error:
 ```json
@@ -142,6 +187,10 @@ On error:
 - Python 3.9+ (included in Xcode Command Line Tools)
 - HFST tools installed (via Homebrew or manually)
 - giella-core (for missing.py)
+- **divvun-runtime** (for divvun_analyze operation):
+  ```bash
+  brew install divvun/divvun/divvun-runtime
+  ```
 
 ## Architecture
 
