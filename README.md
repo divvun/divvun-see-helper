@@ -18,10 +18,7 @@ All features support multiple languages configured via `~/.divvun-see-helper-con
 
 - **macOS** 10.15 or newer
 - **Python** 3.9+ (included in Xcode Command Line Tools)
-- **divvun-runtime** - Text analysis engine
-  ```bash
-  brew install divvun/divvun/divvun-runtime
-  ```
+- **[divvun-runtime](https://github.com/divvun/divvun-runtime)** - Text analysis engine
 - **giella-core** - Must be cloned from GitHub
 - **Graphviz** (for Draw Dependency Tree service)
   ```bash
