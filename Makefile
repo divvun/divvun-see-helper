@@ -1,14 +1,16 @@
-.PHONY: install uninstall sign notarize help
+.PHONY: install uninstall sign notarize install-service uninstall-service help
 
 APP_NAME = Divvun-SEE-helper.app
 INSTALL_DIR = $(HOME)/Applications
 
 help:
 	@echo "Available targets:"
-	@echo "  make install    - Install app to ~/Applications"
-	@echo "  make uninstall  - Remove app from ~/Applications"
-	@echo "  make sign       - Code sign the app (requires Developer ID)"
-	@echo "  make notarize   - Notarize the app with Apple (requires sign first)"
+	@echo "  make install           - Install app to ~/Applications"
+	@echo "  make uninstall         - Remove app from ~/Applications"
+	@echo "  make install-service   - Install text analysis macOS service"
+	@echo "  make uninstall-service - Remove text analysis service"
+	@echo "  make sign              - Code sign the app (requires Developer ID)"
+	@echo "  make notarize          - Notarize the app with Apple (requires sign first)"
 	@echo ""
 	@echo "Environment variables for signing/notarizing:"
 	@echo "  CODESIGN_IDENTITY - Your signing identity (default: 'Developer ID Application')"
@@ -32,5 +34,11 @@ uninstall:
 sign:
 	@./sign.sh
 
+
+install-service:
+	@./services/install-service.sh
+
+uninstall-service:
+	@./services/uninstall-service.sh
 notarize:
 	@./notarize.sh

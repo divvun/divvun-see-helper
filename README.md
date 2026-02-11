@@ -105,6 +105,48 @@ make
 
 The helper automatically searches for the newest `${LANGCODE}.drb` file in any `tools/analysers/` directory within your project, regardless of build directory names (searches up to 2 levels deep).
 
+## macOS Service: Analyze Text System-Wide
+
+Divvun-SEE-helper includes a macOS Service that lets you analyze selected text from any application - not just SubEthaEdit. This Quick Action appears in the Services menu when text is selected.
+
+### Installing the Service
+
+```bash
+make install-service
+```
+
+This installs the Quick Action to your system. After installation, you'll see "Analyser tekst" (or "Analyze Text") in the Services menu when text is selected.
+
+### Using the Service
+
+1. Select text in any application
+2. Right-click → Services → "Analyser tekst" (or use keyboard shortcut if configured)
+3. The text will be analyzed and results will open in SubEthaEdit
+
+### Configuring the Service
+
+Set the default analysis language in `~/.divvun-see-helper-config`:
+
+```bash
+# Default language for text analysis service
+export DEFAULT_ANALYSIS_LANG=sma
+
+# Path to language repositories (required)
+export GTLANGS=/path/to/langtech/gut
+```
+
+The service requires:
+- A built `.drb` analyser file for the language (see Divvun-runtime analysis section above)
+- SubEthaEdit installed in `/Applications/`
+
+For more details, see [services/README.md](services/README.md).
+
+### Uninstalling the Service
+
+```bash
+make uninstall-service
+```
+
 ## Debugging
 
 Debug logging is **disabled** by default to avoid unnecessary log files. To enable logging, add the following to `~/.divvun-see-helper-config`:
