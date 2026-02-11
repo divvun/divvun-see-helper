@@ -1,21 +1,38 @@
 # Divvun-SEE-helper
 
-Helper app for SubEthaEdit's Divvun modes, designed to circumvent macOS sandbox restrictions.
+Helper app for SubEthaEdit's Divvun modes and system-wide text analysis services.
 
-## About
+##  Overview
 
-SubEthaEdit is a sandboxed macOS application that cannot execute external binaries directly. Divvun-SEE-helper.app is an unsandboxed helper app that runs outside the sandbox and provides access to tools like `hfst-lookup`, `missing.py`, and other HFST/Giella tools.
+SubEthaEdit is sandboxed and cannot execute external binaries directly. Divvun-SEE-helper is an unsandboxed helper app that provides access to HFST/Giella tools and creates system-wide macOS Services for text analysis.
 
-## Features
+## Main Features
 
-- **Lexc-lexicalise-missing**: Analyzes words in LexC files and suggests missing lexicon entries by running `missing.py` from giella-core
-- **Divvun-runtime analysis**: Analyzes text using `divvun-runtime` with prebuilt `.drb` analyser files from the project build tree
-- **Clipboard-based communication**: Uses clipboard with base64-encoded JSON for secure data transfer between sandbox and helper
-- **UTF-8 support**: Correctly handles South Sámi and other Sámi languages with special characters
+1. **LexC Analysis for SubEthaEdit** - Analyzes words in LexC files and suggests missing lexicon entries
+2. **Analyze Text Service** - System-wide service for morphological and syntactic analysis (opens in SubEthaEdit)
+3. **Draw Dependency Tree Service** - System-wide service that visualizes dependency trees as PNG images
+
+All features support multiple languages configured via `~/.divvun-see-helper-config`.
+
+## System Requirements
+
+- **macOS** 10.15 or newer
+- **Python** 3.9+ (included in Xcode Command Line Tools)
+- **divvun-runtime** - Text analysis engine
+  ```bash
+  brew install divvun/divvun/divvun-runtime
+  ```
+- **giella-core** - Must be cloned from GitHub
+- **Graphviz** (for Draw Dependency Tree service)
+  ```bash
+  brew install graphviz
+  ```
+- **SubEthaEdit** (for Analyze Text service results)
+- **Built analyser files** (`.drb`) - See [Building Analysers](#building-analysers) below
 
 ## Installation
 
-### Simple installation (with Makefile)
+### 1. Install the helper app
 
 ```bash
 make install
@@ -23,237 +40,221 @@ make install
 
 This copies `Divvun-SEE-helper.app` to `~/Applications/`.
 
-### Manual installation
+First-time use: Right-click the app and choose "Open" to approve it (macOS security requirement).
 
-1. Copy `Divvun-SEE-helper.app` to `~/Applications/`
-2. The first time you run the app, you must right-click and choose "Open" to approve the app (macOS security)
-
-```bash
-cp -R Divvun-SEE-helper.app ~/Applications/
-```
-
-### For developers: Code signing and notarization
-
-To distribute the app without macOS security warnings, you need an Apple Developer account.
-
-**1. Configure environment variables:**
-
-Copy `.env.example` to `.env` and fill in the values:
-
-```bash
-cp .env.example .env
-# Edit .env with your Apple Developer details
-source .env
-```
-
-**2. Sign the app:**
-
-```bash
-make sign
-# or directly: ./sign.sh
-```
-
-**3. Notarize the app:**
-
-```bash
-make notarize
-# or directly: ./notarize.sh
-```
-
-Once notarization is complete, the app can be installed without security warnings.
-
-## Configuration
-
-The helper app automatically finds `missing.py` by checking these locations in order:
-
-1. `$GTLANGS/giella-core/scripts/missing.py` (from JSON input)
-2. `~/.divvun-see-helper-config` (optional config file)
-3. `~/langtech/gut/giellalt/giella-core/scripts/missing.py`
-4. `~/langtech/giellalt/giella-core/scripts/missing.py`
-
-### Optional configuration
-
-Create `~/.divvun-see-helper-config` to specify a custom path to giella-core and to enable logging:
-
-```bash
-# Custom path to giella-core (optional)
-export GTCORE=/path/to/giella-core
-
-# Enable debug logging (default is false)
-export ENABLE_LOGGING=true
-```
-
-## Usage
-
-The helper app is automatically launched by SubEthaEdit modes when you use features that require external tools:
-
-- **LexC mode**: `⌃⌥⌘M` (Ctrl+Option+Cmd+M) for "Lexicalise missing"
-
-### Divvun-runtime analysis
-
-For the `divvun_analyze` operation to work, you need:
-
-1. **divvun-runtime** installed (see System Requirements)
-2. A **built analyser** (`.drb` file) in your language project
-
-To build the analyser:
-```bash
-cd /path/to/lang-xxx
-./configure --enable-analyser-tool --enable-tokenisers
-make
-```
-
-The helper automatically searches for the newest `${LANGCODE}.drb` file in any `tools/analysers/` directory within your project, regardless of build directory names (searches up to 2 levels deep).
-
-## macOS Service: Analyze Text System-Wide
-
-Divvun-SEE-helper includes a macOS Service that lets you analyze selected text from any application - not just SubEthaEdit. This Quick Action appears in the Services menu when text is selected.
-
-### Installing the Service
+### 2. Install macOS Services (optional)
 
 ```bash
 make install-service
 ```
 
-This installs the Quick Action to your system. After installation, you'll see "Analyser tekst" (or "Analyze Text") in the Services menu when text is selected.
+This installs two Quick Actions:
+- **Analyze Text** - Shows morphological/syntactic analysis
+- **Draw Dependency Tree** - Creates visual dependency graph
 
-### Using the Service
+Services appear in the Services menu when text is selected in any application.
 
-1. Select text in any application
-2. Right-click → Services → "Analyser tekst" (or use keyboard shortcut if configured)
-3. The text will be analyzed and results will open in SubEthaEdit
-
-### Configuring the Service
-
-Set the default analysis language in `~/.divvun-see-helper-config`:
+### 3. Uninstall
 
 ```bash
-# Default language for text analysis service
-export DEFAULT_ANALYSIS_LANG=sma
-
-# Path to language repositories (required)
-export GTLANGS=/path/to/langtech/gut
+make uninstall              # Remove helper app
+make uninstall-service      # Remove services
 ```
 
-The service requires:
-- A built `.drb` analyser file for the language (see Divvun-runtime analysis section above)
-- SubEthaEdit installed in `/Applications/`
+## Configuration
 
-For more details, see [services/README.md](services/README.md).
-
-### Uninstalling the Service
+Create `~/.divvun-see-helper-config`:
 
 ```bash
-make uninstall-service
+# Default language for analysis (ISO 639-3 code)
+export DEFAULT_ANALYSIS_LANG="sme"
+
+# Path to giellalt root directory (not language-specific)
+export GTLANGS="$HOME/langtech/gut/giellalt"
+
+# Path to giella-core (for missing.py and cg-dep2dot.py)
+export GTCORE="$HOME/langtech/gut/giellalt/giella-core"
+
+# Enable debug logging (default: false)
+export ENABLE_LOGGING=true
+```
+
+### Building Analysers
+
+To use text analysis features, you need a built `.drb` analyser file:
+
+```bash
+cd $GTLANGS/lang-sme  # or lang-sma, lang-smj, etc.
+./configure --enable-analyser-tool --enable-tokenisers
+make
+```
+
+The helper automatically finds `bundle.drb` or `${LANGCODE}.drb` in `tools/analysers/` directories.
+
+## Features in Detail
+
+### 1. LexC Analysis (SubEthaEdit Integration)
+
+Analyzes words in LexC files and suggests missing lexicon entries using `missing.py` from giella-core.
+
+**Usage:**
+1. Open a `.lexc` file in SubEthaEdit
+2. Press `⌃⌥⌘M` (Ctrl+Option+Cmd+M)
+3. Get suggestions for missing entries
+
+**How it works:**
+- SubEthaEdit sends JSON request via clipboard
+- Helper runs `missing.py` with the word list
+- Results are returned via clipboard to SubEthaEdit
+
+### 2. Analyze Text Service
+
+System-wide macOS Service that analyzes selected text from any application.
+
+**Usage:**
+1. Select text in any app (Safari, Mail, TextEdit, etc.)
+2. Right-click → Services → **Analyze Text**
+3. Results open in SubEthaEdit (vislcg3 format)
+
+**Output format:**
+```
+"<word>"
+    "lemma" POS Tags... <W:0.0> @SYNTAG #id->head
+```
+
+Shows:
+- Morphological analysis (lemma, part-of-speech, grammatical tags)
+- Syntactic function tags
+- Dependency relations
+
+### 3. Draw Dependency Tree Service
+
+System-wide service that creates visual dependency tree diagrams.
+
+**Usage:**
+1. Select text in any application  
+2. Right-click → Services → **Draw Dependency Tree**
+3. PNG image opens in Preview (can be copied)
+
+**How it works:**
+1. Analyzes text with `divvun-runtime`
+2. Converts to dependency tree with `cg-dep2dot.py`
+3. Generates PNG with Graphviz
+4. Opens in Preview for viewing/copying
+
+### Switching Languages
+
+Change language by editing `~/.divvun-see-helper-config`:
+
+```bash
+export DEFAULT_ANALYSIS_LANG="sma"  # Change from sme to sma
+```
+
+All services use this setting. Make sure you have a built analyser for the language.
+
+## Code Signing & Distribution (Developers)
+
+To distribute without macOS security warnings, you need an Apple Developer account.
+
+### 1. Configure signing
+
+```bash
+cp .env.example .env
+# Edit .env with your Apple Developer credentials
+source .env
+```
+
+Required variables:
+- `CODESIGN_IDENTITY` - Your signing identity
+- `APPLE_TEAM_ID` - Your Team ID
+- `APPLE_ID` - Your Apple ID email  
+- `APPLE_APP_PASSWORD` - App-specific password
+
+### 2. Sign and notarize
+
+```bash
+make sign       # Code sign the app
+make notarize   # Notarize with Apple
 ```
 
 ## Debugging
 
-Debug logging is **disabled** by default to avoid unnecessary log files. To enable logging, add the following to `~/.divvun-see-helper-config`:
+Enable logging in `~/.divvun-see-helper-config`:
 
 ```bash
 export ENABLE_LOGGING=true
 ```
 
-When logging is enabled, the helper app will log all activity to:
-
-```
-~/divvun-see-helper-debug.log
-```
-
-Check this file when troubleshooting.
-
-## Communication Protocol
-
-The helper app communicates via clipboard using JSON format:
-
-### Operation: analyze_missing
-
-Analyzes words using `missing.py` from giella-core.
-
-**Input (from SubEthaEdit):**
-```json
-{
-  "operation": "analyze_missing",
-  "lang": "sma",
-  "gtlangs": "/path/to/lang-sma/..",
-  "docname": "filename.lexc",
-  "input_words_b64": "<base64-encoded words>"
-}
+View logs:
+```bash
+tail -f ~/divvun-see-helper-debug.log
 ```
 
-**Output (from helper):**
-```json
-{
-  "status": "success",
-  "output": "<result from missing.py>"
-}
-```
+The log shows:
+- Operations performed
+- File paths searched
+- Command execution details
+- Error messages
 
-### Operation: divvun_analyze
+## Advanced
 
-Analyzes text using `divvun-runtime` with prebuilt `.drb` analyser files.
+### Communication Protocol
 
-**Input (from SubEthaEdit):**
+The helper uses clipboard-based JSON communication with base64-encoded input:
+
+**Request format:**
 ```json
 {
   "operation": "divvun_analyze",
-  "lang": "sma",
-  "gtlangs": "/path/to/lang-sma",
-  "input_words_b64": "<base64-encoded words>"
+  "lang": "sme",
+  "gtlangs": "/path/to/giellalt",
+  "input_words_b64": "<base64-encoded text>"
 }
 ```
 
-**Output (from helper):**
+**Response format:**
 ```json
 {
   "status": "success",
-  "output": "<analysis result from divvun-runtime>"
+  "output": "<analysis result>"
 }
 ```
 
-### Error responses
-
-On error:
+**Error format:**
 ```json
 {
   "status": "error",
-  "message": "Error message",
-  "details": "Detailed error information"
+  "message": "Error description",
+  "details": "Additional information"
 }
 ```
 
-## System Requirements
+### Supported Operations
 
-- macOS 10.15 or newer
-- Python 3.9+ (included in Xcode Command Line Tools)
-- HFST tools installed (via Homebrew or manually)
-- giella-core (for missing.py)
-- **divvun-runtime** (for divvun_analyze operation):
-  ```bash
-  brew install divvun/divvun/divvun-runtime
-  ```
+- `analyze_missing` - Find missing LexC entries (uses `missing.py`)
+- `divvun_analyze` - Morphological and syntactic analysis (uses `divvun-runtime`)
 
-## Architecture
+### Architecture
 
 ```
 Divvun-SEE-helper.app/
 ├── Contents/
-│   ├── Info.plist          # App metadata
+│   ├── Info.plist
 │   └── MacOS/
-│       ├── run-helper      # Wrapper that sets UTF-8 locale
-│       └── divvun-see-helper  # Main script
+│       ├── run-helper                        # UTF-8 wrapper
+│       ├── divvun-see-helper                 # Main script
+│       ├── analyze-text-service.sh           # Service: text analysis
+│       └── analyze-dependency-tree-service.sh # Service: tree visualization
 ```
 
-### Components:
+**Path handling:**
+- Automatically extends `PATH` to include `~/.cargo/bin`, `/usr/local/bin`, `/opt/homebrew/bin`
+- Essential for finding `divvun-runtime` in macOS Services context
 
-1. **run-helper**: Wrapper script that sets `LANG=en_US.UTF-8` and `LC_ALL=en_US.UTF-8` before running the main script
-2. **divvun-see-helper**: Bash script that:
-   - Reads JSON from clipboard
-   - Base64-decodes input
-   - Finds and runs missing.py
-   - Constructs JSON response with escaped newlines
-   - Writes result back to clipboard
+**File search:**
+- Searches for analysers: `${GTLANGS}/lang-${LANGCODE}/*/tools/analysers/{bundle.drb,${LANGCODE}.drb}`
+- Uses newest file if multiple found (modification time)
+- Searches up to 3 directory levels
 
 ## License
 
@@ -261,6 +262,12 @@ MIT - see LICENSE file.
 
 ## Contact
 
-Divvun/Giellatekno
+**Divvun/Giellatekno**
 - GitHub: https://github.com/divvun
 - Website: https://giellalt.github.io
+
+## See Also
+
+- [services/README.md](services/README.md) - Detailed service documentation
+- [giella-core](https://github.com/giellalt/giella-core) - Core Giellalt tools
+- [SubEthaEdit](https://subethaedit.net) - Collaborative text editor
