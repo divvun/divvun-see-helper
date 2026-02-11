@@ -241,7 +241,7 @@ Divvun-SEE-helper.app/
 │       ├── run-helper                        # UTF-8 wrapper
 │       ├── divvun-see-helper                 # Main script
 │       ├── analyze-text-service.sh           # Service: text analysis
-│       └── analyze-dependency-tree-service.sh # Service: tree visualization
+│       └── draw-dependency-tree-service.sh # Service: tree visualization
 ```
 
 **Path handling:**

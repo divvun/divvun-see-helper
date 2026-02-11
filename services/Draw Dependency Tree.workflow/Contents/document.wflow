@@ -59,7 +59,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>"$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-dependency-tree-service.sh"</string>
+				<string>"$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/draw-dependency-tree-service.sh"</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# analyze-dependency-tree-service.sh
+# draw-dependency-tree-service.sh
 # macOS Service for visualizing dependency trees
 #
 # This script:

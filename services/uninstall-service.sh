@@ -16,7 +16,7 @@ echo
 
 # Paths
 TEXT_SERVICE="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-text-service.sh"
-DEP_SERVICE="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-dependency-tree-service.sh"
+DEP_SERVICE="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/draw-dependency-tree-service.sh"
 WORKFLOW_DIR="$HOME/Library/Services"
 
 # Remove service scripts

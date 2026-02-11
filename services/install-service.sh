@@ -40,7 +40,7 @@ chmod +x "$SERVICE_DEST"
 echo -e "${GREEN}✓ Text analysis service installed${NC}"
 
 # Install dependency tree service
-DEP_SCRIPT="analyze-dependency-tree-service.sh"
+DEP_SCRIPT="draw-dependency-tree-service.sh"
 DEP_DEST="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/$DEP_SCRIPT"
 cp "$SCRIPT_DIR/$DEP_SCRIPT" "$DEP_DEST"
 chmod +x "$DEP_DEST"
