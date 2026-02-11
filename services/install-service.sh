@@ -99,7 +99,13 @@ EOF
 fi
 echo
 
-# Step 4: Instructions
+# Step 4: Refresh Services database
+echo -e "${YELLOW}Step 4: Refreshing Services database...${NC}"
+/System/Library/CoreServices/pbs -flush 2>/dev/null || killall -KILL pbs 2>/dev/null || true
+echo -e "${GREEN}✓ Services database refreshed${NC}"
+echo
+
+# Step 5: Instructions
 echo -e "${GREEN}=== Installation Complete ===${NC}"
 echo
 echo "The service is now installed and should appear in the Services menu."
@@ -113,7 +119,6 @@ echo "Configuration:"
 echo "  Edit $CONFIG_FILE"
 echo "  to change the default language and project paths."
 echo
-echo "Note: If the service doesn't appear immediately, you may need to:"
-echo "  - Log out and log back in"
-echo "  - Or run: /System/Library/CoreServices/pbs -flush"
+echo "Note: If the service doesn't appear immediately, try logging out and"
+echo "      logging back in, or wait a few minutes for the system to refresh."
 echo

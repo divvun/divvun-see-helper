@@ -46,12 +46,13 @@ if [ $REMOVED_COUNT -eq 0 ]; then
 fi
 
 echo
+echo -e "${YELLOW}Refreshing Services database...${NC}"
+/System/Library/CoreServices/pbs -flush 2>/dev/null || killall -KILL pbs 2>/dev/null || true
+echo -e "${GREEN}✓ Services database refreshed${NC}"
+
+echo
 echo -e "${GREEN}=== Uninstallation Complete ===${NC}"
 echo
 echo "Note: Configuration file (~/.divvun-see-helper-config) was not removed."
 echo "Remove it manually if you no longer need it."
-echo
-echo "To refresh the Services menu, you may need to:"
-echo "  - Log out and log back in"
-echo "  - Or run: /System/Library/CoreServices/pbs -flush"
 echo
