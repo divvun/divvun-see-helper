@@ -4,6 +4,10 @@
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# Extend PATH to include common binary locations
+# This is critical when running from macOS Services which have minimal PATH
+export PATH="$HOME/.cargo/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
+
 # Check if logging is enabled via config file
 ENABLE_LOGGING=false
 if [ -f "$HOME/.divvun-see-helper-config" ]; then
