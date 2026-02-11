@@ -32,7 +32,7 @@ fi
 
 # Set defaults if not configured
 DEFAULT_ANALYSIS_LANG="${DEFAULT_ANALYSIS_LANG:-sme}"
-GTLANGS="${GTLANGS:-$HOME/langtech/gut/giellalt/lang-${DEFAULT_ANALYSIS_LANG}}"
+GTLANGS="${GTLANGS:-$HOME/langtech/gut/giellalt}"
 
 # Check if divvun-see-helper exists
 HELPER_APP="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/divvun-see-helper"

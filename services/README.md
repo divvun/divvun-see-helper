@@ -52,8 +52,8 @@ Edit `~/.divvun-see-helper-config`:
 # Default language for text analysis (ISO 639-3 code)
 export DEFAULT_ANALYSIS_LANG="sme"
 
-# Path to language project
-export GTLANGS="$HOME/langtech/gut/giellalt/lang-sme"
+# Path to giellalt root directory (not language-specific)
+export GTLANGS="$HOME/langtech/gut/giellalt"
 ```
 
 ### Supported languages
@@ -211,7 +211,7 @@ You can create separate services for different languages by duplicating the Auto
 ```bash
 # Instead of reading from config, hardcode the language:
 DEFAULT_ANALYSIS_LANG="sma"
-GTLANGS="$HOME/langtech/gut/giellalt/lang-sma"
+GTLANGS="$HOME/langtech/gut/giellalt"
 ```
 
 ### Custom output handling

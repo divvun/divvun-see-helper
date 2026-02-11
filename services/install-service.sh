@@ -78,7 +78,7 @@ export ENABLE_LOGGING=false
 
 # Text Analysis Service settings
 export DEFAULT_ANALYSIS_LANG="sme"
-export GTLANGS="$HOME/langtech/gut/giellalt/lang-sme"
+export GTLANGS="$HOME/langtech/gut/giellalt"
 EOF
     echo -e "${GREEN}✓ Created default configuration${NC}"
     echo -e "${YELLOW}  Please edit $CONFIG_FILE to set your paths${NC}"
@@ -90,7 +90,7 @@ else
 
 # Text Analysis Service settings
 export DEFAULT_ANALYSIS_LANG="sme"
-export GTLANGS="$HOME/langtech/gut/giellalt/lang-sme"
+export GTLANGS="$HOME/langtech/gut/giellalt"
 EOF
         echo -e "${GREEN}✓ Added service settings to configuration${NC}"
     else

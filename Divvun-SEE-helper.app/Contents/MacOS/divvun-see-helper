@@ -198,18 +198,26 @@ elif [ "$OPERATION" = "divvun_analyze" ]; then
     fi
     
     # Find the newest .drb file for the language
-    # The file is always named ${LANGCODE}.drb and located in tools/analysers/
-    # Build directories can have various names and are located 1-2 levels down
+    # GTLANGS should point to the giellalt root (e.g., /path/to/giellalt)
+    # We append lang-${LANGCODE} to get the language-specific directory
+    # The analyser file can be named either ${LANGCODE}.drb or bundle.drb
     DRB_FILE=""
     
-    log "Searching for ${LANGCODE}.drb in tools/analysers/ directories..."
+    # Construct path to language directory
+    LANG_DIR="${GTLANGS}/lang-${LANGCODE}"
     
-    # Search for ${LANGCODE}.drb in all tools/analysers/ subdirectories
-    # Supports build dirs at both 1 level ($GTLANGS/build/tools/analysers/) 
-    # and 2 levels down ($GTLANGS/some/build/tools/analysers/)
-    if [ -d "$GTLANGS" ]; then
-        # Find all matching .drb files, searching up to 3 levels deep
-        FOUND_FILES=$(find "$GTLANGS" -maxdepth 3 -type f -path "*/tools/analysers/${LANGCODE}.drb" 2>/dev/null)
+    log "Searching for analyser .drb in ${LANG_DIR}/*/tools/analysers/..."
+    
+    # Search for analyser in tools/analysers/ subdirectories
+    # First try language-specific name (${LANGCODE}.drb), then fallback to bundle.drb
+    if [ -d "$LANG_DIR" ]; then
+        # Try ${LANGCODE}.drb first
+        FOUND_FILES=$(find "$LANG_DIR" -maxdepth 3 -type f -path "*/tools/analysers/${LANGCODE}.drb" 2>/dev/null)
+        
+        # If not found, try bundle.drb  
+        if [ -z "$FOUND_FILES" ]; then
+            FOUND_FILES=$(find "$LANG_DIR" -maxdepth 3 -type f -path "*/tools/analysers/bundle.drb" 2>/dev/null)
+        fi
         
         if [ -n "$FOUND_FILES" ]; then
             # Get the newest file by modification time
@@ -230,7 +238,9 @@ elif [ "$OPERATION" = "divvun_analyze" ]; then
     log "Found .drb file: $DRB_FILE"
     
     # Run divvun-runtime with the .drb file
+    # Disable ANSI color codes with NO_COLOR to get clean output
     export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
+    export NO_COLOR=1
     log "Running: divvun-runtime run -p $DRB_FILE"
     
     if [ "$ENABLE_LOGGING" = "true" ]; then
