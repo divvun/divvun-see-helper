@@ -46,9 +46,9 @@ if [ -d "$WORKFLOW_DIR/Analyze Text.workflow" ]; then
     REMOVED_COUNT=$((REMOVED_COUNT + 1))
 fi
 
-if [ -d "$WORKFLOW_DIR/Analyze Dependency Tree.workflow" ]; then
-    rm -rf "$WORKFLOW_DIR/Analyze Dependency Tree.workflow"
-    echo -e "${GREEN}✓ Removed: Analyze Dependency Tree${NC}"
+if [ -d "$WORKFLOW_DIR/Draw Dependency Tree.workflow" ]; then
+    rm -rf "$WORKFLOW_DIR/Draw Dependency Tree.workflow"
+    echo -e "${GREEN}✓ Removed: Draw Dependency Tree${NC}"
     REMOVED_COUNT=$((REMOVED_COUNT + 1))
 fi
 

@@ -60,9 +60,9 @@ if [ -d "$SCRIPT_DIR/Analyze Text.workflow" ]; then
     INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
 fi
 
-if [ -d "$SCRIPT_DIR/Analyze Dependency Tree.workflow" ]; then
-    cp -R "$SCRIPT_DIR/Analyze Dependency Tree.workflow" "$WORKFLOW_DIR/"
-    echo -e "${GREEN}✓ Installed: Analyze Dependency Tree${NC}"
+if [ -d "$SCRIPT_DIR/Draw Dependency Tree.workflow" ]; then
+    cp -R "$SCRIPT_DIR/Draw Dependency Tree.workflow" "$WORKFLOW_DIR/"
+    echo -e "${GREEN}✓ Installed: Draw Dependency Tree${NC}"
     INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
 fi
 
