@@ -2,6 +2,8 @@
 
 Helper app for SubEthaEdit's Divvun modes and system-wide text analysis services.
 
+**Current version: 1.1.0** - [See version history](VERSION.md)
+
 ##  Overview
 
 SubEthaEdit is sandboxed and cannot execute external binaries directly. Divvun-SEE-helper is an unsandboxed helper app that provides access to HFST/Giella tools and creates system-wide macOS Services for text analysis.
