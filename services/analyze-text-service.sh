@@ -15,34 +15,56 @@ set -e
 # macOS Services run with minimal PATH, so we must add standard locations
 export PATH="$HOME/.cargo/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
 
+# Load configuration early to check for logging
+CONFIG_FILE="$HOME/.divvun-see-helper-config"
+ENABLE_LOGGING=false
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
+# Helper function for logging
+log() {
+    if [ "$ENABLE_LOGGING" = "true" ]; then
+        LOG_FILE="$HOME/divvun-see-helper-debug.log"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [analyze-text-service] $@" >> "$LOG_FILE"
+    fi
+}
+
+log "=== Analyze Text Service Started ==="
+log "PATH: $PATH"
+
 # Read input text from stdin
 INPUT_TEXT=$(cat)
+log "Input text length: ${#INPUT_TEXT} characters"
 
 # Check if we got any input
 if [ -z "$INPUT_TEXT" ]; then
+    log "ERROR: No input text received"
     osascript -e 'display alert "No text selected" message "Please select some text to analyze."'
     exit 1
-fi
-
-# Load configuration
-CONFIG_FILE="$HOME/.divvun-see-helper-config"
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
 fi
 
 # Set defaults if not configured
 DEFAULT_ANALYSIS_LANG="${DEFAULT_ANALYSIS_LANG:-sme}"
 GTLANGS="${GTLANGS:-$HOME/langtech/gut/giellalt}"
 
+log "Language: $DEFAULT_ANALYSIS_LANG"
+log "GTLANGS: $GTLANGS"
+
 # Check if divvun-see-helper exists
 HELPER_APP="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/divvun-see-helper"
+log "Helper app: $HELPER_APP"
 if [ ! -f "$HELPER_APP" ]; then
+    log "ERROR: Helper app not found at $HELPER_APP"
     osascript -e 'display alert "Divvun SEE Helper not found" message "Please install Divvun-SEE-helper.app to ~/Applications/"'
     exit 1
 fi
 
 # Check if divvun-runtime is installed
-if ! command -v divvun-runtime &> /dev/null; then
+DIVVUN_RUNTIME_PATH=$(which divvun-runtime 2>/dev/null || echo "")
+log "divvun-runtime: $DIVVUN_RUNTIME_PATH"
+if [ -z "$DIVVUN_RUNTIME_PATH" ]; then
+    log "ERROR: divvun-runtime not found in PATH"
     osascript -e 'display alert "divvun-runtime not installed" message "Install with: brew install divvun/divvun/divvun-runtime"'
     exit 1
 fi
@@ -62,16 +84,20 @@ EOF
 )
 
 # Send request via clipboard
+log "Sending JSON request to helper via clipboard"
 echo -n "$JSON_REQUEST" | pbcopy
 
 # Run the helper
+log "Executing: $HELPER_APP"
 "$HELPER_APP" 2>/dev/null
 
 # Get response from clipboard
 RESPONSE=$(pbpaste)
+log "Received response from helper (length: ${#RESPONSE} characters)"
 
 # Parse response
 STATUS=$(echo "$RESPONSE" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('status', 'error'))" 2>/dev/null)
+log "Response status: $STATUS"
 
 if [ "$STATUS" != "success" ]; then
     # Extract error message
@@ -97,9 +123,12 @@ fi
 
 # Create temporary file with .vislcg3 extension
 TEMP_FILE=$(mktemp -t divvun-analysis).vislcg3
+log "Created temporary file: $TEMP_FILE"
 echo "$OUTPUT" > "$TEMP_FILE"
+log "Output written to file (${#OUTPUT} characters)"
 
 # Open in SubEthaEdit
+log "Opening result in SubEthaEdit"
 if [ -d "/Applications/SubEthaEdit.app" ]; then
     open -a SubEthaEdit "$TEMP_FILE"
 elif [ -d "$HOME/Applications/SubEthaEdit.app" ]; then
@@ -112,4 +141,5 @@ fi
 # Note: The temp file will remain in /tmp and be cleaned up by the system
 # If SubEthaEdit saves it, it will be saved to a different location
 
+log "=== Analyze Text Service Complete ==="
 exit 0
