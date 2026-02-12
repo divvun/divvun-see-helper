@@ -212,11 +212,11 @@ elif [ "$OPERATION" = "divvun_analyze" ]; then
     # First try language-specific name (${LANGCODE}.drb), then fallback to bundle.drb
     if [ -d "$LANG_DIR" ]; then
         # Try ${LANGCODE}.drb first
-        FOUND_FILES=$(find "$LANG_DIR" -maxdepth 3 -type f -path "*/tools/analysers/${LANGCODE}.drb" 2>/dev/null)
+        FOUND_FILES=$(find "$LANG_DIR" -maxdepth 5 -type f -path "*/tools/analysers/${LANGCODE}.drb" 2>/dev/null)
         
         # If not found, try bundle.drb  
         if [ -z "$FOUND_FILES" ]; then
-            FOUND_FILES=$(find "$LANG_DIR" -maxdepth 3 -type f -path "*/tools/analysers/bundle.drb" 2>/dev/null)
+            FOUND_FILES=$(find "$LANG_DIR" -maxdepth 5 -type f -path "*/tools/analysers/bundle.drb" 2>/dev/null)
         fi
         
         if [ -n "$FOUND_FILES" ]; then

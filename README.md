@@ -251,7 +251,7 @@ Divvun-SEE-helper.app/
 **File search:**
 - Searches for analysers: `${GTLANGS}/lang-${LANGCODE}/*/tools/analysers/{bundle.drb,${LANGCODE}.drb}`
 - Uses newest file if multiple found (modification time)
-- Searches up to 3 directory levels
+- Searches up to 5 directory levels
 
 ## License
 
