@@ -13,7 +13,7 @@ set -e
 
 # Extend PATH to include common binary locations
 # macOS Services run with minimal PATH, so we must add standard locations
-export PATH="$HOME/.cargo/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
+export PATH="$HOME/bin:$HOME/.cargo/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
 
 # Load configuration early to check for logging
 CONFIG_FILE="$HOME/.divvun-see-helper-config"
