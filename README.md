@@ -2,7 +2,7 @@
 
 Helper app for SubEthaEdit's Divvun modes and system-wide text analysis services.
 
-**Current version: 1.1.0** - [See version history](VERSION.md)
+**Current version: 1.1.1** - [See version history](VERSION.md)
 
 ##  Overview
 

@@ -1,5 +1,29 @@
 # Version History
 
+## Version 1.1.1 (2026-02-13)
+
+### Bug Fixes
+
+**Critical fix for service installation**
+- Fixed missing service scripts that caused "No such file or directory" errors when using services
+- Service scripts now reside in `Divvun-SEE-helper.app/Contents/MacOS/` as part of the app bundle
+- Eliminated code duplication - scripts exist in one location only
+- Simplified installation process - `make install` now installs a complete, self-contained app
+
+**Architecture improvement:**
+- Service scripts (`analyze-text-service.sh` and `draw-dependency-tree-service.sh`) are now part of the app bundle itself
+- No longer duplicated in `services/` directory
+- Installation process simplified - no copying needed, app bundle is complete
+
+This fix resolves the issue where users would see errors like:
+```
+/Users/username/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-text-service.sh: No such file or directory
+```
+
+**Users affected by v1.1.0**: Please update to v1.1.1 by running `make install` to get the fixed app bundle.
+
+---
+
 ## Version 1.1.0 (2026-02-12)
 
 ### New Features

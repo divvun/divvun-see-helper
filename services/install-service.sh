@@ -24,27 +24,31 @@ SERVICE_DEST="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/$SERVICE_S
 WORKFLOW_DIR="$HOME/Library/Services"
 CONFIG_FILE="$HOME/.divvun-see-helper-config"
 
-# Step 1: Installing service scripts...
-echo -e "${YELLOW}Step 1: Installing service scripts...${NC}"
+# Step 1: Verify app installation
+echo -e "${YELLOW}Step 1: Verifying app installation...${NC}"
 if [ ! -d "$HOME/Applications/Divvun-SEE-helper.app" ]; then
     echo -e "${RED}Error: Divvun-SEE-helper.app not found in ~/Applications/${NC}"
     echo "Please run 'make install' first to install the main app."
     exit 1
 fi
 
-# Install text analysis service
-SERVICE_SCRIPT="analyze-text-service.sh"
-SERVICE_DEST="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/$SERVICE_SCRIPT"
-cp "$SCRIPT_DIR/$SERVICE_SCRIPT" "$SERVICE_DEST"
-chmod +x "$SERVICE_DEST"
-echo -e "${GREEN}✓ Text analysis service installed${NC}"
+# Verify service scripts are in the app bundle
+SERVICE_SCRIPT="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/analyze-text-service.sh"
+DEP_SCRIPT="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/draw-dependency-tree-service.sh"
 
-# Install dependency tree service
-DEP_SCRIPT="draw-dependency-tree-service.sh"
-DEP_DEST="$HOME/Applications/Divvun-SEE-helper.app/Contents/MacOS/$DEP_SCRIPT"
-cp "$SCRIPT_DIR/$DEP_SCRIPT" "$DEP_DEST"
-chmod +x "$DEP_DEST"
-echo -e "${GREEN}✓ Dependency tree service installed${NC}"
+if [ ! -f "$SERVICE_SCRIPT" ]; then
+    echo -e "${RED}Error: analyze-text-service.sh not found in app bundle${NC}"
+    echo "Please reinstall the app with 'make install'"
+    exit 1
+fi
+
+if [ ! -f "$DEP_SCRIPT" ]; then
+    echo -e "${RED}Error: draw-dependency-tree-service.sh not found in app bundle${NC}"
+    echo "Please reinstall the app with 'make install'"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ App bundle verified with service scripts${NC}"
 echo
 
 # Step 2: Install Automator workflows

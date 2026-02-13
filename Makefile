@@ -23,11 +23,6 @@ install:
 	@mkdir -p $(INSTALL_DIR)
 	@rm -rf $(INSTALL_DIR)/$(APP_NAME)
 	@cp -R $(APP_NAME) $(INSTALL_DIR)/
-	@echo "Copying service scripts to app bundle..."
-	@cp services/analyze-text-service.sh $(INSTALL_DIR)/$(APP_NAME)/Contents/MacOS/
-	@cp services/draw-dependency-tree-service.sh $(INSTALL_DIR)/$(APP_NAME)/Contents/MacOS/
-	@chmod +x $(INSTALL_DIR)/$(APP_NAME)/Contents/MacOS/analyze-text-service.sh
-	@chmod +x $(INSTALL_DIR)/$(APP_NAME)/Contents/MacOS/draw-dependency-tree-service.sh
 	@echo "✓ $(APP_NAME) installed successfully"
 	@echo "  Location: $(INSTALL_DIR)/$(APP_NAME)"
 
